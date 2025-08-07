@@ -1,10 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  base: '/EnergiastuVida',
+  base: '/EnergiastuVida/',
+
   plugins: [react()],
+
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+
+  build: {
+    outDir: 'docs'
+  }
 });
