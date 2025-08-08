@@ -1,575 +1,148 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1"
-  />
-  <title>Energías de tu Vida</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Energías tu Vida</title>
 
-  <!-- Tipografías premium -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Playfair+Display:wght@400;600;700&display=swap"
-    rel="stylesheet"
-  />
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    :root{
-      --wine:#2a0d18;           /* vino profundo */
-      --wine-2:#3a0f1f;
-      --gold:#d6b26e;           /* dorado cálido */
-      --gold-2:#f2d9a6;
-      --cream:#f9f6f1;          /* blanco cálido */
-      --ink:#1c1a1a;
-      --ok:#12c27d;
-      --bad:#ea4555;
-      --glow:0 0 22px rgba(214,178,110,.35), 0 0 4px rgba(242,217,166,.4) inset;
-      --shadow:0 10px 40px rgba(0,0,0,.35);
-      --r:12px;
-      --t:280ms cubic-bezier(.2,.7,.2,1);
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:"Playfair Display",serif;
-      color:var(--cream);
-      background:
-        radial-gradient(1200px 800px at 120% -10%, #6b2538 0%, transparent 60%),
-        radial-gradient(900px 900px at -15% 110%, #5c1c2e 0%, transparent 55%),
-        linear-gradient(180deg, var(--wine) 0%, var(--wine-2) 100%);
-      overflow:hidden;
-    }
-
-    /* Flares y sparkles del fondo (CSS puro) */
-    .flares, .sparkles{position:fixed; inset:0; pointer-events:none;}
-    .flares::before, .flares::after{
-      content:"";
-      position:absolute; border-radius:50%;
-      filter:blur(40px); opacity:.35; mix-blend-mode:screen;
-      animation:float 18s ease-in-out infinite;
-    }
-    .flares::before{
-      width:300px;height:300px; left:8%; top:18%;
-      background:radial-gradient(circle, var(--gold-2), transparent 60%);
-      animation-delay:-4s;
-    }
-    .flares::after{
-      width:260px;height:260px; right:10%; bottom:12%;
-      background:radial-gradient(circle, #ffdca9, transparent 60%);
-    }
-    @keyframes float{
-      0%,100%{transform:translate3d(0,0,0) scale(1)}
-      50%{transform:translate3d(20px,-14px,0) scale(1.06)}
-    }
-
-    .sparkles canvas{position:absolute; inset:0;}
-
-    /* Contenedor principal */
-    .wrap{
-      position:relative; height:100%; width:100%;
-      display:grid; place-items:center;
-      padding:clamp(16px, 4vw, 36px);
-    }
-    .card{
-      width:min(980px, 92vw);
-      min-height:560px;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(12px);
-      position:relative; overflow:hidden;
-    }
-    .card::before{
-      content:"";
-      position:absolute; inset:-20%; filter:blur(60px); opacity:.08;
-      background:
-        radial-gradient(600px 280px at 20% 20%, var(--gold) 0%, transparent 60%),
-        radial-gradient(420px 200px at 85% 70%, var(--gold-2) 0%, transparent 60%);
-      pointer-events:none;
-    }
-
-    /* Pantallas */
-    .screen{
-      position:absolute; inset:0; padding:40px clamp(24px, 5vw, 56px);
-      display:grid; grid-template-rows:auto 1fr auto; gap:18px;
-      opacity:0; transform:translateY(12px) scale(.98); pointer-events:none;
-      transition:opacity var(--t), transform var(--t);
-    }
-    .screen.active{
-      opacity:1; transform:translateY(0) scale(1); pointer-events:auto;
-    }
-    .title{
-      font-family:"Cinzel", serif;
-      font-weight:700; letter-spacing:.4px;
-      font-size:clamp(26px, 3.3vw, 44px);
-      line-height:1.15; margin:6px 0 2px;
-      text-shadow:0 2px 0 rgba(0,0,0,.15);
-    }
-    .gold-underline{
-      position:relative; display:inline-block;
-    }
-    .gold-underline::after{
-      content:""; position:absolute; left:-4px; right:-4px; bottom:-6px; height:10px;
-      background:linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold-2) 50%, var(--gold) 80%, transparent);
-      border-radius:10px; filter:blur(1px); opacity:.9;
-    }
-    .sub{
-      color:#efdcc8; opacity:.92; font-size:clamp(15px,1.6vw,18px);
-      max-width:60ch
-    }
-
-    /* Botones */
-    .btn{
-      --pad:14px 22px;
-      display:inline-grid; place-items:center;
-      padding:var(--pad); border-radius:999px; border:1px solid rgba(255,255,255,.14);
-      color:var(--ink); background:linear-gradient(180deg, var(--gold-2), var(--gold));
-      font-weight:700; font-family:"Cinzel",serif; letter-spacing:.6px; text-transform:uppercase;
-      box-shadow:var(--glow), 0 8px 20px rgba(214,178,110,.18);
-      cursor:pointer; transition:transform .16s ease, filter .16s ease, box-shadow .16s ease;
-      position:relative; overflow:hidden; user-select:none;
-    }
-    .btn:hover{ filter:saturate(1.1) brightness(1.03) }
-    .btn:active{ transform:scale(.98) }
-    .btn.shimmer::after{
-      content:""; position:absolute; inset:0;
-      background:linear-gradient(120deg, transparent 20%, rgba(255,255,255,.36) 40%, transparent 60%);
-      transform:translateX(-120%); transition:transform .7s ease;
-    }
-    .btn:hover.shimmer::after{ transform:translateX(120%) }
-
-    /* Ripple */
-    .ripple{ position:absolute; border-radius:50%; background:rgba(255,255,255,.5); transform:scale(0); animation:rip .6s ease-out forwards }
-    @keyframes rip{ to{ transform:scale(5); opacity:0 } }
-
-    /* Inputs */
-    .field{
-      display:flex; gap:12px; flex-wrap:wrap;
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-      padding:10px; border-radius:14px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
-      width:min(720px, 100%);
-    }
-    .field input{
-      flex:1; font-size:18px; padding:14px 14px;
-      background:transparent; border:none; color:var(--cream); outline:none;
-      font-family:"Playfair Display",serif;
-    }
-    .hint{
-      margin-top:12px; padding:10px 14px; border-radius:10px;
-      color:#ffd9df; background:linear-gradient(180deg, rgba(234,69,85,.18), rgba(234,69,85,.12));
-      border:1px solid rgba(234,69,85,.35); width:min(720px,100%);
-      font-size:14px
-    }
-
-    /* Intro layout */
-    .hero{
-      display:grid; align-content:center; gap:20px; min-height:420px;
-      background: radial-gradient(1200px 300px at 50% 0%, rgba(255,255,255,.06), transparent 60%);
-    }
-    .cta-row{display:flex; gap:14px; flex-wrap:wrap; align-items:center}
-    .cta-row .btn{padding:16px 26px; font-size:15px}
-
-    /* Loader dorado */
-    .aura{
-      width:88px;height:88px;border-radius:50%;
-      border:3px solid rgba(214,178,110,.2); position:relative;
-      display:grid; place-items:center; margin:20px 0 6px;
-    }
-    .aura::before{
-      content:""; position:absolute; inset:-8px; border-radius:50%;
-      background:radial-gradient(circle, rgba(242,217,166,.75) 0%, transparent 60%);
-      filter:blur(10px); animation:pulse 1.5s ease-in-out infinite;
-    }
-    .spinner{
-      width:36px;height:36px;border:3px solid rgba(214,178,110,.25);
-      border-top-color:var(--gold-2); border-radius:50%;
-      animation:spin .9s linear infinite
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes pulse{0%,100%{opacity:.5}50%{opacity:.9}}
-
-    /* Barra de progreso */
-    .bar{
-      height:10px;border-radius:999px;background:rgba(255,255,255,.1);
-      width:min(720px,100%); overflow:hidden; border:1px solid rgba(255,255,255,.12)
-    }
-    .bar > span{
-      display:block;height:100%; width:0%;
-      background:linear-gradient(90deg, #f7e7be, var(--gold), #e7c88f);
-      box-shadow:0 0 16px rgba(214,178,110,.5);
-      border-radius:999px; transition:width 1.6s ease;
-    }
-
-    /* Pirámide de puntos */
-    .dots{ --s:14px; display:grid; grid-template-columns:repeat(9, var(--s)); gap:9px; margin:14px 0 2px }
-    .dot{ width:var(--s); height:var(--s); border-radius:50%; background:rgba(255,255,255,.18) }
-    .dot.bad{ background:linear-gradient(180deg,#ff7f8a,#ff3350); box-shadow:0 0 12px rgba(255,51,80,.5) }
-
-    /* “Gráficos” simples (torta + curva) */
-    .chart-row{display:grid; grid-template-columns:260px 1fr; gap:22px; align-items:center; margin:14px 0}
-    .donut{
-      --p:62; /* porcentaje alineado */
-      width:220px;height:220px;border-radius:50%;
-      background:
-        conic-gradient(#12c27d calc(var(--p)*1%), #ea4555 0);
-      box-shadow:var(--shadow);
-      position:relative;
-    }
-    .donut::after{
-      content:attr(data-label);
-      position:absolute; inset:26px; border-radius:50%;
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      display:grid; place-items:center; font-weight:700; font-family:"Cinzel",serif;
-      font-size:22px; color:var(--gold-2);
-      border:1px solid rgba(255,255,255,.14);
-    }
-    .curve{
-      height:160px; border:1px solid rgba(255,255,255,.12); border-radius:14px;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      position:relative; overflow:hidden;
-    }
-    .curve svg{position:absolute; inset:0}
-    .legend{font-size:14px; opacity:.9; display:flex; gap:14px; margin-top:10px}
-    .bullet{display:inline-grid; place-items:center; width:12px;height:12px;border-radius:3px;margin-right:8px}
-
-    /* Ofertas */
-    .list{margin:16px 0 20px; display:grid; gap:10px}
-    .li{display:flex; gap:12px; align-items:flex-start}
-    .check{width:22px;height:22px;border-radius:6px; background:linear-gradient(180deg,#1ddf95,#12c27d); box-shadow:0 0 10px rgba(18,194,125,.4)}
-    .li span{transform:translateY(1px)}
-
-    .product{
-      width:240px; height:160px; border-radius:16px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)),
-        radial-gradient(400px 100px at 20% 0%, rgba(242,217,166,.35), transparent 60%),
-        #3a0f1f;
-      border:1px solid rgba(255,255,255,.1); box-shadow:var(--shadow);
-      display:grid; place-items:center; font-family:"Cinzel",serif; letter-spacing:.4px
-    }
-
-    /* Transiciones entre pantallas extra */
-    .fadeOut{ animation:fadeOut .45s ease forwards }
-    .zoomIn{ animation:zoomIn .55s var(--t) forwards }
-    .slideUp{ animation:slideUp .5s var(--t) forwards }
-    .slideLeft{ animation:slideLeft .5s var(--t) forwards }
-    @keyframes fadeOut{ to{opacity:0; filter:blur(2px)} }
-    @keyframes zoomIn{ from{transform:scale(.98); opacity:.2} to{transform:scale(1); opacity:1} }
-    @keyframes slideUp{ from{transform:translateY(18px); opacity:.1} to{transform:translateY(0); opacity:1} }
-    @keyframes slideLeft{ from{transform:translateX(18px); opacity:.1} to{transform:translateX(0); opacity:1} }
-
-    /* Video embed mock */
-    .video{
-      aspect-ratio:16/9; width:min(720px,100%);
-      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      border:1px solid rgba(255,255,255,.12); border-radius:14px; display:grid; place-items:center;
-      color:#eadac8; box-shadow:var(--shadow);
-    }
-    .video .btn{padding:10px 16px;font-size:13px}
-    .row{display:flex; gap:10px; flex-wrap:wrap}
-
-    /* Footer nav */
-    .nav{display:flex; justify-content:flex-end}
-  </style>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <div class="flares"></div>
-  <div class="sparkles"><canvas id="stars"></canvas></div>
 
-  <div class="wrap">
-    <div class="card">
+  <!-- sparkles / flares -->
+  <canvas id="fx" aria-hidden="true"></canvas>
 
-      <!-- SCREEN 1: INTRO -->
-      <section class="screen active zoomIn" id="intro">
-        <header>
-          <h1 class="title">Descubre las Energías de tu <span class="gold-underline">Nombre Completo</span></h1>
-          <p class="sub">Una experiencia mística y precisa para revelar la vibración que te acompaña. Siente el brillo dorado guiando tu camino.</p>
-        </header>
+  <main id="app">
 
-        <div class="hero">
-          <!-- números “místicos” sutiles -->
-          <p style="opacity:.65;letter-spacing:4px;font-family:Cinzel,serif">
-            1&nbsp;&nbsp;3&nbsp;&nbsp;5&nbsp;&nbsp;8&nbsp;&nbsp;13&nbsp;&nbsp;21&nbsp;&nbsp;34&nbsp;&nbsp;55&nbsp;&nbsp;89
-          </p>
-          <div class="cta-row">
-            <button class="btn shimmer" data-next="name">Analizar mis energías</button>
+    <!-- Screen 1: Intro -->
+    <section class="screen active" data-screen="intro">
+      <div class="content center">
+        <h1 class="title">
+          Descubre las Energías de tu <span class="gold-underline">Nombre Completo</span>
+        </h1>
+        <p class="subtitle">Una experiencia mística guiada por la numerología.</p>
+        <button class="btn primary" data-next="name">ANALIZAR MIS ENERGÍAS</button>
+      </div>
+      <div class="bg bg-numbers"></div>
+    </section>
+
+    <!-- Screen 2: Name Input -->
+    <section class="screen" data-screen="name">
+      <div class="content narrow">
+        <p class="instruction">
+          Escribe aquí abajo SOLO tu nombre completo de bautismo, exactamente igual que en tu acta de nacimiento, no olvides los acentos (si los hay).
+        </p>
+        <input id="fullName" type="text" autocomplete="name" placeholder="Escribe tu nombre completo..." />
+        <button class="btn primary" id="calcBtn">Calcular energías</button>
+        <div class="warn">
+          <strong>Importante:</strong> SOLO tu nombre completo de bautismo, si escribes algo más, el resultado será incorrecto.
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Calculating -->
+    <section class="screen" data-screen="calc">
+      <div class="content narrow center">
+        <h2>Estamos calculando la energía de tu nombre ⏳</h2>
+        <p>Mientras calculamos tus energías, te explicaré cómo la numerología puede transformar tu vida.</p>
+
+        <!-- “video” placeholder (embebible) -->
+        <div class="video">
+          <div class="video-frame">[Vídeo explicativo aquí]</div>
+          <div class="video-actions">
+            <button class="btn ghost small">Continuar viendo</button>
+            <button class="btn ghost small">Ver desde el inicio</button>
           </div>
         </div>
 
-        <footer class="nav"></footer>
-      </section>
+        <div class="progress">
+          <div class="bar"></div>
+        </div>
+      </div>
+    </section>
 
-      <!-- SCREEN 2: NAME INPUT -->
-      <section class="screen" id="name">
-        <header>
-          <h2 class="title">Escribe tu nombre completo</h2>
-          <p class="sub">
-            Escribe aquí abajo <b>SOLO tu nombre completo de bautismo</b>, exactamente igual que en tu acta de nacimiento, no olvides los acentos (si los hay).
-          </p>
-        </header>
+    <!-- Screen 4: Diagnosis -->
+    <section class="screen" data-screen="diag">
+      <div class="content">
+        <h2>Diagnóstico de Secuencias Negativas</h2>
+        <p class="muted">Tu nombre tiene las siguientes secuencias negativas:</p>
+        <ul class="list">
+          <li><strong>222</strong> — Cuando la autoconfianza se ve debilitada…</li>
+          <li><strong>777</strong> — Cuando el miedo y la intolerancia se sobreponen…</li>
+          <li><strong>909</strong> — Rupturas cíclicas que frenan el avance…</li>
+        </ul>
 
-        <div>
-          <div class="field">
-            <input id="fullName" autocomplete="name" placeholder="Escribe tu nombre completo…" />
-            <button class="btn shimmer" id="calcBtn">Calcular energías</button>
-          </div>
-          <div class="hint">⚠️ SOLO tu nombre completo de bautismo, si escribes algo más, el resultado será incorrecto.</div>
+        <!-- Pirámide de puntos -->
+        <div class="pyramid">
+          <span class="dot glow"></span><span class="dot"></span><span class="dot"></span>
+          <span class="dot"></span><span class="dot glow"></span><span class="dot"></span><span class="dot"></span>
+          <span class="dot"></span><span class="dot"></span><span class="dot glow"></span>
         </div>
 
-        <footer class="nav">
-          <button class="btn" data-back="intro" style="background:transparent;color:var(--gold-2);border-color:rgba(255,255,255,.2)">Volver</button>
-        </footer>
-      </section>
+        <button class="btn primary right" data-next="align">Continuar</button>
+      </div>
+    </section>
 
-      <!-- SCREEN 3: CALCULATING -->
-      <section class="screen" id="calcScreen">
-        <header>
-          <h2 class="title">Estamos calculando la energía de tu nombre ⏳</h2>
-          <p class="sub">Mientras calculamos tus energías, te explicaré cómo la numerología puede transformar tu vida.</p>
-        </header>
+    <!-- Screen 5: Alignment -->
+    <section class="screen" data-screen="align">
+      <div class="content">
+        <h2>Entiende el Diagnóstico</h2>
+        <p class="muted">Corrección de alineación de tus energías</p>
 
-        <div>
-          <div class="aura"><div class="spinner"></div></div>
-          <div class="video">
-            <div style="text-align:center">
-              <div style="margin-bottom:10px; font-weight:700; letter-spacing:.3px">Video explicativo</div>
-              <div class="row" style="justify-content:center">
-                <button class="btn">Continuar viendo</button>
-                <button class="btn" style="background:transparent;color:var(--gold-2);border-color:rgba(255,255,255,.2)">Ver desde el inicio</button>
-              </div>
+        <div class="charts">
+          <div class="radial">
+            <svg viewBox="0 0 120 120">
+              <circle class="track" cx="60" cy="60" r="50" />
+              <circle class="value green" cx="60" cy="60" r="50" stroke-dasharray="0 999" />
+              <circle class="value red"   cx="60" cy="60" r="50" stroke-dasharray="0 999" />
+            </svg>
+            <div class="radial-label">
+              <div><span id="alignedPct">0%</span> Alineadas</div>
+              <div><span id="misalignedPct">0%</span> Desalineadas</div>
             </div>
           </div>
 
-          <div style="margin-top:16px">
-            <div class="bar"><span id="progress"></span></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SCREEN 4: DIAGNÓSTICO -->
-      <section class="screen" id="diag">
-        <header>
-          <h2 class="title">Diagnóstico de Secuencias Negativas</h2>
-          <p class="sub">Tu nombre tiene las siguientes secuencias negativas:</p>
-        </header>
-
-        <div>
-          <ul style="margin:8px 0 18px;line-height:1.6">
-            <li><b>222</b> — Cuando la autoconfianza se ve debilitada…</li>
-            <li><b>777</b> — Cuando el miedo y la intolerancia se sobreponen…</li>
-          </ul>
-
-          <div class="dots">
-            <!-- pirámide simple -->
-            <!-- fila 1 -->
-            <span class="dot"></span>
-            <!-- fila 2 -->
-            <span class="dot"></span><span class="dot"></span>
-            <!-- fila 3 -->
-            <span class="dot"></span><span class="dot bad"></span><span class="dot"></span>
-            <!-- fila 4 -->
-            <span class="dot"></span><span class="dot"></span><span class="dot bad"></span><span class="dot"></span>
-            <!-- fila 5 -->
-            <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          </div>
-        </div>
-
-        <footer class="nav">
-          <button class="btn shimmer" data-next="align">Entender diagnóstico</button>
-        </footer>
-      </section>
-
-      <!-- SCREEN 5: ALINEACIÓN -->
-      <section class="screen" id="align">
-        <header>
-          <h2 class="title">Entiende el Diagnóstico</h2>
-          <p class="sub">Corrección de alineación de tus energías</p>
-        </header>
-
-        <div class="chart-row">
-          <div class="donut" id="donut" data-label="62% alineado"></div>
-
-          <div>
-            <div class="curve">
-              <svg viewBox="0 0 400 160" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="gr" x1="0" x2="1" y1="0" y2="0">
-                    <stop offset="0%" stop-color="#f7e7be"/>
-                    <stop offset="100%" stop-color="#d6b26e"/>
-                  </linearGradient>
-                </defs>
-                <!-- línea animada -->
-                <path id="curvePath" d="M10,120 C90,120 120,70 170,90 C220,110 280,80 390,40"
-                  fill="none" stroke="url(#gr)" stroke-width="4" stroke-linecap="round"
-                  style="filter:drop-shadow(0 4px 10px rgba(214,178,110,.35))"/>
-              </svg>
+          <div class="timeline">
+            <div class="line">
+              <div class="point"></div>
+              <div class="point"></div>
+              <div class="point"></div>
+              <div class="point active"></div>
             </div>
-            <div class="legend">
-              <div><span class="bullet" style="background:#12c27d"></span>Alineado</div>
-              <div><span class="bullet" style="background:#ea4555"></span>Desalineado</div>
-            </div>
+            <p class="muted center">Curva de mejora tras la corrección</p>
           </div>
         </div>
 
-        <footer class="nav">
-          <button class="btn shimmer" data-next="offer">Continuar</button>
-        </footer>
-      </section>
+        <button class="btn primary right" data-next="offer">Ver mi mapa</button>
+      </div>
+    </section>
 
-      <!-- SCREEN 6: OFERTA -->
-      <section class="screen" id="offer">
-        <header>
-          <h2 class="title">Descubre el Camino de tu Prosperidad ✨</h2>
-        </header>
+    <!-- Screen 6: Offer -->
+    <section class="screen" data-screen="offer">
+      <div class="content">
+        <h2>Descubre el Camino de tu Prosperidad ✨</h2>
 
-        <div style="display:grid; grid-template-columns: 1fr 260px; gap:20px; align-items:center">
-          <div>
-            <div class="list">
-              <div class="li"><span class="check"></span><span>Secuencias positivas alineadas</span></div>
-              <div class="li"><span class="check"></span><span>Corrección de energías limitantes</span></div>
-              <div class="li"><span class="check"></span><span>Descifrar tu vibración interna</span></div>
-              <div class="li"><span class="check"></span><span>Claves para prosperidad</span></div>
-              <div class="li"><span class="check"></span><span>PDF personalizado exclusivo</span></div>
-            </div>
+        <ul class="benefits">
+          <li>✔ Secuencias positivas alineadas</li>
+          <li>✔ Corrección de energías limitantes</li>
+          <li>✔ Descifrar tu vibración interna</li>
+          <li>✔ Claves para prosperidad</li>
+          <li>✔ PDF personalizado exclusivo</li>
+        </ul>
 
-            <button class="btn shimmer" id="buyBtn">Descargar mi mapa ahora</button>
-          </div>
-
-          <div class="product">
-            <div>Mapa Numerológico</div>
-            <div style="opacity:.85;font-size:12px">Edición Personalizada</div>
-          </div>
+        <div class="product">
+          <div class="cover">Mapa Numerológico<br/>Personalizado</div>
         </div>
 
-        <footer class="nav"></footer>
-      </section>
+        <a class="btn primary big" href="#checkout" id="cta">DESCARGAR MI MAPA AHORA</a>
+      </div>
+    </section>
 
-    </div>
-  </div>
+  </main>
 
-  <script>
-    /* ===== Sparkles suaves (estrellas) ===== */
-    (function stars(){
-      const c = document.getElementById('stars');
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      const ctx = c.getContext('2d');
-      function size(){ c.width = innerWidth*dpr; c.height = innerHeight*dpr; }
-      size(); addEventListener('resize', size);
-      const S = [...Array(80)].map(()=>({
-        x: Math.random()*c.width,
-        y: Math.random()*c.height,
-        r: (Math.random()*1.8+0.6)*dpr,
-        a: Math.random()*1
-      }));
-      function loop(){
-        ctx.clearRect(0,0,c.width,c.height);
-        for(const s of S){
-          s.a += 0.02;
-          const o = .25 + Math.sin(s.a)*.25;
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-          ctx.fillStyle = `rgba(242,217,166,${o})`;
-          ctx.fill();
-        }
-        requestAnimationFrame(loop);
-      }
-      loop();
-    })();
-
-    /* ===== Navegação entre telas ===== */
-    const screens = [...document.querySelectorAll('.screen')];
-    const byId = id => document.getElementById(id);
-    function show(id, effect="slideUp"){
-      const current = screens.find(s=>s.classList.contains('active'));
-      const next = byId(id);
-      if(current===next) return;
-      current && current.classList.add('fadeOut');
-      setTimeout(()=>{
-        current && current.classList.remove('active','fadeOut');
-        next.classList.add('active', effect);
-        setTimeout(()=>next.classList.remove(effect), 600);
-      }, 320);
-    }
-
-    // micro ripple
-    function addRipple(e){
-      const btn = e.currentTarget;
-      const r = document.createElement('span');
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - rect.left, y = e.clientY - rect.top;
-      r.className = 'ripple'; r.style.left = x+'px'; r.style.top = y+'px';
-      btn.appendChild(r); setTimeout(()=>r.remove(), 600);
-    }
-
-    // botões de navegação
-    document.querySelectorAll('[data-next]').forEach(b=>{
-      b.addEventListener('click', e=>{
-        addRipple(e);
-        show(b.dataset.next, 'zoomIn');
-      });
-    });
-    document.querySelectorAll('[data-back]').forEach(b=>{
-      b.addEventListener('click', e=>{
-        addRipple(e);
-        show(b.dataset.back, 'slideLeft');
-      });
-    });
-
-    /* ===== Fluxo do cálculo ===== */
-    const fullName = byId('fullName');
-    const calcBtn = byId('calcBtn');
-    const progress = byId('progress');
-
-    calcBtn.addEventListener('click', e=>{
-      addRipple(e);
-      // feedback de campo
-      if(!fullName.value.trim()){
-        fullName.animate([{boxShadow:'0 0 0 0 rgba(234,69,85,0)'},{boxShadow:'0 0 0 6px rgba(234,69,85,.25)'}],{duration:280, direction:'alternate'});
-        fullName.focus();
-        return;
-      }
-      show('calcScreen','zoomIn');
-      // barra até 85%
-      progress.style.width = '85%';
-      // depois segue ao diagnóstico
-      setTimeout(()=> show('diag','slideUp'), 2100);
-    });
-
-    /* ===== Animar “donut” e curva ===== */
-    function animateDonut(){
-      const donut = byId('donut');
-      let v = 0; const target = 62; // %
-      const i = setInterval(()=>{
-        v += 2; if(v>target){ v=target; clearInterval(i); }
-        donut.style.setProperty('--p', v);
-        donut.setAttribute('data-label', v + '% alineado');
-      }, 36);
-    }
-    const observer = new IntersectionObserver((entries)=>{
-      entries.forEach(e=>{
-        if(e.isIntersecting && e.target.id==='align'){
-          animateDonut();
-        }
-      });
-    }, {threshold:.6});
-    screens.forEach(s=>observer.observe(s));
-
-    /* ===== CTA Final ===== */
-    byId('buyBtn').addEventListener('click', (e)=>{
-      addRipple(e);
-      // Redirecione para checkout real aqui:
-      alert('Redireccionando al checkout… (coloca tu URL de pago aquí)');
-      // location.href = 'https://tu-checkout.com/pagar';
-    });
-
-    // acessibilidade: Enter avança no input
-    fullName.addEventListener('keydown', e=>{
-      if(e.key==='Enter'){ calcBtn.click(); }
-    });
-  </script>
+  <script src="./app.js"></script>
 </body>
 </html>
