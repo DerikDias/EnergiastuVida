@@ -1,24 +1,521 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Prueba rápida</title>
-  <style>
-    html, body { height:100%; margin:0; }
-    body {
-      display:grid; place-items:center; 
-      font: 600 28px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(80% 80% at 50% 20%, #fff8e6 0%, #fff 40%, #faf6ff 100%);
-      color:#4b1b1f;
-    }
-    .card {
-      padding:24px 28px; border-radius:16px; 
-      background:#fff; box-shadow:0 10px 40px rgba(0,0,0,.08), inset 0 0 0 1px rgba(0,0,0,.06);
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Energías de tu Vida</title>
+<meta name="color-scheme" content="light only" />
+<style>
+  :root{
+    --maroon:#611a2b;           /* vino */
+    --maroon-2:#3f0f1a;
+    --gold:#e7b650;             /* dorado */
+    --gold-2:#f4d27c;
+    --gold-3:#ffefbf;
+    --white:#ffffff;
+    --ink:#1c1320;
+    --rose:#ffe9f3;
+    --green:#24a86a;
+    --red:#e35a5a;
+    --shadow:0 10px 40px rgba(0,0,0,.16);
+    --ring:0 0 0 3px rgba(231,182,80,.35);
+    --radius:18px;
+    --dur:420ms;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+
+  /* Reset & layout */
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    color:var(--maroon);
+    background:
+      radial-gradient(1200px 600px at 20% 0%, #fff8e6 0%, #fff 40%, #fbf7ff 90%),
+      linear-gradient(180deg,#fff 0%, #fff 35%, #fff7f9 100%);
+    overflow-x:hidden;
+  }
+  .app{
+    min-height:100%;
+    display:grid;
+    place-items:center;
+    padding:32px 18px 48px;
+  }
+  .card{
+    width:min(980px, 94vw);
+    background:var(--white);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow), inset 0 0 0 1px rgba(0,0,0,.06);
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* Header */
+  .header{
+    padding:22px 26px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border-bottom:1px solid rgba(0,0,0,.06);
+    background:
+      radial-gradient(650px 200px at 10% -40%, rgba(231,182,80,.18), transparent 60%),
+      radial-gradient(450px 180px at 90% -30%, rgba(97,26,43,.09), transparent 60%),
+      #fff;
+  }
+  .brand{
+    width:44px;height:44px;border-radius:12px;
+    background:
+      conic-gradient(from 210deg, var(--gold) 0 35%, #fff 35% 37%, var(--maroon) 37% 65%, #fff 65% 67%, var(--gold) 67% 100%);
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,.06), 0 6px 18px rgba(231,182,80,.25);
+  }
+  .title{
+    font-weight:800;
+    letter-spacing:.3px;
+    color:var(--maroon);
+  }
+  .subtitle{
+    font-size:12px;color:#7d4a56;margin-top:2px;
+  }
+
+  /* Screens */
+  .screen{
+    padding:36px clamp(18px, 5vw, 48px) 46px;
+    display:none;
+    opacity:0; transform:translateY(10px);
+    transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+    position:relative;
+  }
+  .screen.active{display:block;opacity:1;transform:translateY(0)}
+  .screen.leave{opacity:0;transform:scale(.98)}
+  .bg-mystic{
+    pointer-events:none;position:absolute;inset:0;opacity:.22;
+    background:
+      radial-gradient(500px 200px at 10% 20%, rgba(231,182,80,.5), transparent 60%),
+      radial-gradient(600px 300px at 90% 0%, rgba(97,26,43,.3), transparent 60%),
+      repeating-radial-gradient(circle at 50% 10%, transparent 0 26px, rgba(231,182,80,.1) 26px 27px);
+    filter:saturate(130%);
+  }
+
+  /* Typo */
+  h1{margin:0 0 12px; font-size:clamp(28px, 5.2vw, 44px); line-height:1.1; color:var(--maroon)}
+  .hl{color:var(--maroon); position:relative; display:inline-block}
+  .hl:after{
+    content:""; position:absolute; left:0; right:0; bottom:2px; height:10px;
+    background:linear-gradient(90deg, var(--gold-3), var(--gold));
+    z-index:-1; border-radius:6px;
+  }
+  p.lead{margin:8px 0 24px; font-size:18px; color:#6b3542}
+
+  /* Buttons */
+  .btn{
+    appearance:none; border:0; cursor:pointer;
+    padding:14px 22px; border-radius:14px;
+    background:linear-gradient(180deg, var(--gold-2), var(--gold));
+    box-shadow:0 8px 24px rgba(231,182,80,.34);
+    color:#3b1b14; font-weight:800; letter-spacing:.4px;
+    transition:transform 140ms var(--ease), filter 220ms var(--ease), box-shadow 220ms var(--ease);
+    position:relative; overflow:hidden;
+  }
+  .btn:hover{transform:translateY(-1px); filter:saturate(110%); box-shadow:0 10px 28px rgba(231,182,80,.42)}
+  .btn:active{transform:scale(.98)}
+  .btn.shimmer::after{
+    content:""; position:absolute; inset:0; 
+    background:linear-gradient(120deg, transparent 0 40%, rgba(255,255,255,.6) 45%, transparent 55% 100%);
+    transform:translateX(-120%);
+    transition:transform 1.2s cubic-bezier(.2,.8,.2,1);
+  }
+  .btn.shimmer:hover::after{transform:translateX(120%)}
+
+  /* Inputs */
+  .form{display:grid; gap:14px; max-width:740px}
+  .input{
+    padding:16px 18px; border-radius:14px; border:1px solid rgba(0,0,0,.12);
+    outline:none; font-size:16px; color:var(--ink);
+    background:#fff; transition:box-shadow 220ms var(--ease), border-color 220ms var(--ease), transform 120ms var(--ease);
+  }
+  .input:focus{box-shadow:var(--ring); border-color:var(--gold)}
+  .warn{
+    border-radius:12px; background: #ffe5e7; color:#902d2d;
+    padding:12px 14px; font-size:14px; border:1px solid rgba(227,90,90,.35);
+  }
+
+  /* Loading */
+  .center{display:grid; place-items:center; gap:14px}
+  .spinner{
+    width:58px;height:58px;border-radius:50%;
+    border:5px solid #f4e7c8;border-top-color:var(--gold);
+    animation:spin 1s linear infinite;
+    filter:drop-shadow(0 6px 18px rgba(231,182,80,.5));
+  }
+  @keyframes spin{to{transform:rotate(1turn)}}
+  .progress{
+    width:min(560px, 86%); height:12px; border-radius:999px; background:#f8f2db;
+    overflow:hidden; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+  }
+  .bar{
+    height:100%; width:0%;
+    background:linear-gradient(90deg, #f8e7b8, var(--gold));
+    box-shadow:inset 0 -6px 12px rgba(0,0,0,.08);
+    transition:width 480ms var(--ease);
+  }
+
+  /* Pyramid of dots */
+  .pyramid{
+    --size:14px;
+    display:grid; grid-template-columns:repeat(9, var(--size));
+    gap:8px; align-items:end; justify-content:center; padding:12px 0 6px;
+  }
+  .dot{
+    width:var(--size); height:var(--size); border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #fff 0, #fff 15%, var(--maroon) 16% 100%);
+    opacity:.38; filter:saturate(60%);
+    transition:opacity 300ms var(--ease), transform 300ms var(--ease), filter 300ms var(--ease);
+  }
+  .dot.neg{background:radial-gradient(circle at 30% 30%, #fff 0, #fff 12%, var(--red) 13% 100%); opacity:.9; filter:saturate(140%); box-shadow:0 0 16px rgba(227,90,90,.55)}
+  .dot:hover{transform:scale(1.12); opacity:1}
+
+  ul.clean{list-style:none; margin:8px 0 0; padding:0}
+  ul.clean li{margin:10px 0; color:#5a2833}
+
+  /* Charts */
+  .charts{
+    display:grid; grid-template-columns: 1fr 1.2fr; gap:22px; align-items:center;
+  }
+  .ring{
+    --val:64;
+    width:160px; height:160px; border-radius:50%;
+    background:conic-gradient(var(--green) calc(var(--val)*1%), #e9b1b1 0);
+    box-shadow:0 10px 26px rgba(0,0,0,.08);
+    display:grid; place-items:center;
+  }
+  .ring-inner{
+    width:126px; height:126px; border-radius:50%; background:#fff; display:grid; place-items:center;
+    font-weight:800; color:#183c2e; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+  }
+  .graph{
+    width:100%; height:180px; background:linear-gradient(180deg, #fff, #fff7fb);
+    border-radius:12px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+    position:relative; overflow:hidden;
+  }
+  .graph svg{position:absolute; inset:0}
+  .graph .axis{stroke:#ead8dd; stroke-width:.8}
+  .graph .line{stroke:var(--green); stroke-width:3.5; fill:none; filter:drop-shadow(0 6px 12px rgba(36,168,106,.35))}
+  .graph .line.red{stroke:#e35a5a; filter:drop-shadow(0 6px 12px rgba(227,90,90,.28))}
+
+  /* Offer */
+  .offer{
+    display:grid; grid-template-columns: 1.2fr 1fr; gap:26px; align-items:center;
+  }
+  .checks{margin:14px 0 18px}
+  .check{display:flex; gap:10px; align-items:flex-start; margin:10px 0; color:#4b1b25}
+  .check i{
+    width:20px;height:20px; border-radius:6px; display:inline-grid; place-items:center;
+    background:#eaf7f1; color:var(--green); font-weight:900; box-shadow:inset 0 0 0 1px rgba(36,168,106,.25)
+  }
+  .book{
+    height:220px; width:160px; border-radius:8px;
+    background:
+      linear-gradient(180deg, rgba(231,182,80,.12), rgba(231,182,80,.06)),
+      repeating-linear-gradient( -12deg, #fff 0 6px, #fbf3ff 6px 12px);
+    border:1px solid rgba(0,0,0,.08); box-shadow:var(--shadow);
+    position:relative; margin:auto;
+  }
+  .book:before{
+    content:"Mapa Numerológico"; position:absolute; top:16px; left:12px; right:12px;
+    font-weight:800; color:#3c1320; font-size:16px;
+  }
+  .book:after{
+    content:"Personalizado"; position:absolute; bottom:14px; left:12px; padding:4px 8px; border-radius:8px;
+    background:var(--gold); color:#3b1b14; font-weight:900; letter-spacing:.3px;
+  }
+
+  /* Footer CTA micro */
+  .mini{
+    margin-top:18px; font-size:13px; color:#7a4a55
+  }
+
+  /* Ripple exit overlay */
+  .ripple{
+    position:absolute; inset:0; pointer-events:none; opacity:0;
+    background:radial-gradient(circle at var(--x,50%) var(--y,50%), rgba(231,182,80,.28), transparent 60%);
+    transition:opacity 380ms var(--ease);
+  }
+  .ripple.show{opacity:1}
+
+  /* Utility */
+  .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+  .right{margin-left:auto}
+  .muted{color:#7d4a56; font-size:14px}
+  .spacer{height:10px}
+</style>
 </head>
 <body>
-  <div class="card">✅ GitHub Pages está sirviendo este HTML</div>
+  <div class="app">
+    <div class="card" id="card">
+      <header class="header">
+        <div class="brand"></div>
+        <div>
+          <div class="title">Energías tu Vida</div>
+          <div class="subtitle">Numerología Premium</div>
+        </div>
+        <div class="right muted">Flujo interactivo</div>
+      </header>
+
+      <!-- Intro -->
+      <section class="screen active" id="intro">
+        <div class="bg-mystic"></div>
+        <h1>Descubre las <span class="hl">Energías</span> de tu <span class="hl">Nombre Completo</span></h1>
+        <p class="lead">Una experiencia mística fluida con visuales sagrados, transiciones suaves y micro-animaciones.</p>
+        <div class="row">
+          <button class="btn shimmer" id="ctaIntro">ANALIZAR MIS ENERGÍAS</button>
+          <span class="muted">Transición con efecto ripple</span>
+        </div>
+        <div class="spacer"></div>
+        <small class="muted">Fondo numérico y brillos simbólicos</small>
+        <div class="ripple" id="rip1"></div>
+      </section>
+
+      <!-- Name input -->
+      <section class="screen" id="name">
+        <div class="bg-mystic"></div>
+        <h1>Escribe tu <span class="hl">nombre completo</span> de bautismo</h1>
+        <p class="lead">Exactamente igual que en tu acta de nacimiento — incluye acentos si los hay.</p>
+        <form class="form" id="nameForm">
+          <input class="input" id="nameInput" placeholder="Escribe tu nombre completo…" autocomplete="name" />
+          <div class="warn">SOLO tu nombre completo de bautismo, si escribes algo más, el resultado será incorrecto.</div>
+          <div class="row">
+            <button class="btn shimmer" id="calc">Calcular energías</button>
+          </div>
+        </form>
+        <div class="ripple" id="rip2"></div>
+      </section>
+
+      <!-- Calculating -->
+      <section class="screen" id="calcScreen">
+        <div class="bg-mystic"></div>
+        <div class="center" style="padding:8px 0 2px">
+          <h1>Estamos calculando la energía de tu nombre ⏳</h1>
+          <p class="lead">Mientras calculamos tus energías, te explicaré cómo la numerología puede transformar tu vida.</p>
+          <div class="row" style="gap:10px">
+            <button class="btn">Continuar viendo</button>
+            <button class="btn" style="background:linear-gradient(180deg,#fff,#f9f1ff); box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);">Ver desde el inicio</button>
+          </div>
+          <div class="spinner"></div>
+          <div class="progress"><div class="bar" id="bar"></div></div>
+        </div>
+      </section>
+
+      <!-- Diagnosis -->
+      <section class="screen" id="diag">
+        <div class="bg-mystic"></div>
+        <h1>Diagnóstico de <span class="hl">Secuencias Negativas</span></h1>
+        <p class="lead">Tu nombre tiene las siguientes secuencias negativas:</p>
+
+        <ul class="clean">
+          <li><b>222</b> — Cuando la autoconfianza se ve debilitada…</li>
+          <li><b>777</b> — Cuando el miedo y la intolerancia se sobreponen…</li>
+          <li><b>909</b> — Dudas internas que frenan la expansión…</li>
+        </ul>
+
+        <div class="spacer"></div>
+        <div class="pyramid" id="pyramid">
+          <!-- 9 x 5-ish dots (we’ll fill by JS) -->
+        </div>
+
+        <div class="row" style="margin-top:18px">
+          <button class="btn shimmer" id="toAlign">Entender diagnóstico</button>
+        </div>
+      </section>
+
+      <!-- Alignment -->
+      <section class="screen" id="align">
+        <div class="bg-mystic"></div>
+        <h1>Entiende el Diagnóstico</h1>
+        <p class="lead">Corrección de alineación de tus energías</p>
+
+        <div class="charts">
+          <div style="display:grid; place-items:center">
+            <div class="ring" id="ring" style="--val:0">
+              <div class="ring-inner"><span id="ringVal">0%</span></div>
+            </div>
+            <small class="muted" style="margin-top:10px">Alineadas vs desalineadas</small>
+          </div>
+
+          <div class="graph">
+            <svg viewBox="0 0 100 60" preserveAspectRatio="none">
+              <!-- axes -->
+              <path class="axis" d="M2 58 H98" />
+              <path class="axis" d="M2 2 V58" />
+              <!-- initial (red) then corrected (green) -->
+              <path id="lineBad" class="line red" d="M2 45 C 25 48, 45 52, 98 50"/>
+              <path id="lineGood" class="line" d="M2 55 C 25 54, 45 52, 98 50"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:18px">
+          <button class="btn shimmer" id="toOffer">Continuar</button>
+        </div>
+      </section>
+
+      <!-- Offer -->
+      <section class="screen" id="offer">
+        <div class="bg-mystic"></div>
+        <h1>Descubre el Camino de tu Prosperidad ✨</h1>
+
+        <div class="offer">
+          <div>
+            <div class="checks">
+              <div class="check"><i>✓</i> Secuencias positivas alineadas</div>
+              <div class="check"><i>✓</i> Corrección de energías limitantes</div>
+              <div class="check"><i>✓</i> Descifrar tu vibración interna</div>
+              <div class="check"><i>✓</i> Claves para prosperidad</div>
+              <div class="check"><i>✓</i> PDF personalizado exclusivo</div>
+            </div>
+
+            <button class="btn shimmer" id="buy">DESCARGAR MI MAPA AHORA</button>
+            <div class="mini">Transición final: fade-out y scroll suave a checkout</div>
+          </div>
+
+          <div class="book"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+/* ========== helpers ========== */
+const qs = sel => document.querySelector(sel);
+const qsa = sel => [...document.querySelectorAll(sel)];
+
+function showScreen(id, withRippleAt=null){
+  const current = qs('.screen.active');
+  if(current){
+    current.classList.remove('active');
+    current.classList.add('leave');
+    setTimeout(()=>current.classList.remove('leave'), 300);
+  }
+  const next = qs(`#${id}`);
+  next.classList.add('active');
+
+  if(withRippleAt){
+    const rect = next.getBoundingClientRect();
+    const x = (withRippleAt.x - rect.left) + 'px';
+    const y = (withRippleAt.y - rect.top)  + 'px';
+    const rip = next.querySelector('.ripple');
+    if(rip){
+      rip.style.setProperty('--x', x);
+      rip.style.setProperty('--y', y);
+      rip.classList.add('show');
+      setTimeout(()=>rip.classList.remove('show'), 420);
+    }
+  }
+}
+
+/* ========== Intro → Name ========== */
+qs('#ctaIntro').addEventListener('click', (e)=>{
+  const pt = {x:e.clientX, y:e.clientY};
+  showScreen('name', pt);
+});
+
+/* ========== Name → Calculating ========== */
+qs('#calc').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const input = qs('#nameInput');
+  if(!input.value.trim()){
+    input.style.transform = 'scale(1.02)';
+    setTimeout(()=> input.style.transform='', 120);
+    return;
+  }
+  // ripple from button click:
+  const pt = {x:e.clientX, y:e.clientY};
+  showScreen('calcScreen', pt);
+
+  // Simular progreso hasta 85%, luego avanzar
+  simulateProgress(()=> showScreen('diag'));
+});
+
+function simulateProgress(done){
+  const bar = qs('#bar');
+  let val = 0;
+  const int = setInterval(()=>{
+    val += Math.random()*12 + 7; // fill irregular
+    if(val > 85) val = 85;
+    bar.style.width = val + '%';
+    if(val >= 85){
+      clearInterval(int);
+      setTimeout(done, 600);
+    }
+  }, 360);
+}
+
+/* ========== Build pyramid dots ========== */
+(function buildPyramid(){
+  const p = qs('#pyramid');
+  if(!p) return;
+  // 9 columns x 6 rows shaped
+  const rows = [3,5,7,9,7,5]; // width per row
+  rows.forEach((w, r)=>{
+    const pad = Math.round((9 - w)/2);
+    for(let i=0;i<9;i++){
+      const d = document.createElement('div');
+      d.className = 'dot';
+      if(i<pad || i>=pad+w){
+        d.style.visibility='hidden';
+      }else{
+        // random negative highlights
+        if(Math.random()<.23) d.classList.add('neg');
+      }
+      p.appendChild(d);
+    }
+  });
+})();
+
+/* ========== Diagnosis → Alignment ========== */
+qs('#toAlign').addEventListener('click', ()=>{
+  showScreen('align');
+  animateCharts();
+});
+
+/* ========== Charts animation ========== */
+function animateCharts(){
+  // ring anim
+  const target = 64; // % alineado
+  const ring = qs('#ring');
+  const ringVal = qs('#ringVal');
+  let v = 0;
+  const t = setInterval(()=>{
+    v += 3;
+    if(v>=target){v=target; clearInterval(t);}
+    ring.style.setProperty('--val', v);
+    ringVal.textContent = v + '%';
+  }, 40);
+
+  // line graph stroke animation
+  const good = qs('#lineGood');
+  const bad  = qs('#lineBad');
+  [good,bad].forEach(path=>{
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    setTimeout(()=>{ path.style.transition = 'stroke-dashoffset 1200ms var(--ease)'; path.style.strokeDashoffset = 0; }, 60);
+  });
+}
+
+/* ========== Alignment → Offer ========== */
+qs('#toOffer').addEventListener('click', ()=>{
+  // slide-left feel = immediate show + subtle glow
+  showScreen('offer');
+});
+
+/* ========== Offer CTA ========== */
+qs('#buy').addEventListener('click', ()=>{
+  // efeito final: fade + scroll — aqui só direcionamos a um placeholder
+  document.body.style.transition = 'opacity 420ms var(--ease)';
+  document.body.style.opacity = .1;
+  setTimeout(()=>{ window.location.href = '#checkout'; }, 420);
+});
+</script>
 </body>
 </html>
